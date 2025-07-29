@@ -1,0 +1,46 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# 숙제 자동 크롤링 봇 개발 가이드
+
+이 프로젝트는 파이썬, 셀레니움(Selenium)과 BeautifulSoup(bs4)를 활용하여 웹사이트에서 학습 관련 정보를 자동으로 수집하고 관리하는 봇을 개발하는 것을 목표로 합니다.
+
+## 핵심 기술 스택
+- **Python**: 주요 프로그래밍 언어
+- **Selenium**: 웹 브라우저 자동화 및 상호작용
+- **BeautifulSoup4(bs4)**: HTML 파싱 및 데이터 추출
+- **Chrome WebDriver**: 셀레니움을 통한 크롬 브라우저 제어
+
+## 주요 기능
+1. **로그인 자동화**: 사용자 인증 정보를 사용하여 학습 플랫폼에 자동 로그인
+2. **페이지 탐색**: 학습 관리 및 시험 관리 페이지로 자동 이동
+3. **데이터 검색**: 특정 코스명 및 ID를 검색하고 탐색
+4. **페이지네이션 처리**: 여러 페이지에 걸친 데이터 검색 및 처리
+5. **팝업 관리**: 자동 로그인 시 발생하는 다양한 팝업창 처리
+
+## 주요 파일 및 기능
+- [login_bot.py](mdc:login_bot.py): 메인 크롤링 봇 코드
+- [requirements.txt](mdc:requirements.txt): 필요한 패키지 목록
+
+## 개발 환경 설정
+1. Python 가상환경 생성 및 활성화
+   ```
+   python -m venv homework-venv
+   source homework-venv/bin/activate  # Windows: homework-venv\Scripts\activate
+   ```
+2. 필요한 패키지 설치
+   ```
+   pip install -r requirements.txt
+   ```
+
+## 봇 실행 방법
+```
+python login_bot.py
+```
+
+## 주의사항
+- 웹사이트 구조가 변경될 경우 XPATH 또는 CSS 선택자를 업데이트해야 할 수 있습니다.
+- 브라우저 업데이트에 따라 WebDriver도 적절히 업데이트해야 합니다.
+- 자동화 스크립트 사용 시 웹사이트의 이용약관을 준수해야 합니다.

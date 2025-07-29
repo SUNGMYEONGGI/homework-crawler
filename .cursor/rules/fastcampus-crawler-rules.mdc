@@ -1,0 +1,119 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# FastCampus Crawler 프로젝트 가이드
+
+## 프로젝트 개요
+이 프로젝트는 FastCampus LMS에서 시험 데이터를 크롤링하는 웹 애플리케이션입니다. 기존 Gradio 기반 도구를 FastAPI와 현대적인 UI/UX로 재구성했습니다.
+
+## 핵심 파일 구조
+
+### 메인 프로젝트
+- [fastcampus_crawler_web_v2.py](mdc:fastcampus_crawler_web_v2.py) - 기존 Gradio 기반 크롤러 (참조용)
+
+### FastAPI 프로젝트 (fastcampus-crawler-api/)
+- [main.py](mdc:fastcampus-crawler-api/main.py) - FastAPI 서버, WebSocket, REST API 엔드포인트
+- [crawler.py](mdc:fastcampus-crawler-api/crawler.py) - 크롤링 로직 (기존 코드를 async/await 패턴으로 변환)
+- [static/index.html](mdc:fastcampus-crawler-api/static/index.html) - 2024-2025 UI/UX 트렌드 적용한 프론트엔드
+- [static/style.css](mdc:fastcampus-crawler-api/static/style.css) - 글래스모피즘, 다크테마 스타일
+- [static/script.js](mdc:fastcampus-crawler-api/static/script.js) - WebSocket 통신, API 호출 로직
+- [requirements.txt](mdc:fastcampus-crawler-api/requirements.txt) - Python 의존성
+- [README.md](mdc:fastcampus-crawler-api/README.md) - 프로젝트 문서
+
+## 주요 기능
+
+### 1. 크롤링 기능
+- FastCampus LMS 로그인 자동화
+- 시험 상세페이지에서 수강생 정보 수집
+- 블로그 링크/과제 내용 추출
+- 다양한 파일 형식 지원 (CSV, Excel, JSON, XML)
+
+### 2. 웹 인터페이스
+- 실시간 로그 표시 (WebSocket)
+- 프로그레스바 및 상태 추적
+- 파일 다운로드 기능
+- 반응형 디자인
+
+### 3. API 엔드포인트
+- `POST /api/start-crawling` - 크롤링 시작
+- `POST /api/stop-crawling` - 크롤링 중지
+- `GET /api/status` - 현재 상태
+- `GET /api/download/{file_path}` - 파일 다운로드
+- `WS /ws` - 실시간 통신
+
+## 개발 규칙
+
+### 코드 스타일
+1. **Python**: PEP 8 준수, async/await 패턴 사용
+2. **JavaScript**: ES6+ 문법, 클래스 기반 구조
+3. **CSS**: CSS3 변수 활용, 반응형 디자인
+
+### UI/UX 가이드라인
+1. **색상 팔레트**: 
+   - Primary: #6366f1 (Indigo)
+   - Secondary: #8b5cf6 (Purple)
+   - Success: #10b981 (Emerald)
+   - Error: #ef4444 (Red)
+
+2. **디자인 원칙**:
+   - 글래스모피즘 (backdrop-filter blur 효과)
+   - 다크 테마 우선
+   - 부드러운 애니메이션 (transition 0.3s ease-out)
+   - 마이크로 인터랙션
+
+### 크롤링 로직
+1. **안전성**: headless Chrome 사용, 에러 핸들링 강화
+2. **성능**: 비동기 처리, 메모리 관리
+3. **사용자 경험**: 실시간 피드백, 중단 가능
+
+## 파일 수정 시 주의사항
+
+### crawler.py 수정 시
+- 기존 fastcampus_crawler_web_v2.py의 로직 유지
+- WebSocket 통신을 위한 async 함수 구조 준수
+- 에러 처리 및 로깅 강화
+
+### 프론트엔드 수정 시
+- 2024-2025 UI/UX 트렌드 유지
+- 반응형 디자인 고려
+- 접근성 (a11y) 준수
+
+### API 수정 시
+- RESTful 설계 원칙 준수
+- 적절한 HTTP 상태 코드 사용
+- 에러 응답 표준화
+
+## 테스트 및 배포
+
+### 로컬 개발
+```bash
+cd fastcampus-crawler-api
+pip install -r requirements.txt
+python main.py
+```
+
+### 확인 사항
+1. WebSocket 연결 정상 동작
+2. 크롤링 로직 정확성
+3. 파일 다운로드 기능
+4. 반응형 UI 테스트
+
+## 기술적 의사결정
+
+### FastAPI 선택 이유
+- 고성능 비동기 처리
+- 자동 API 문서 생성
+- WebSocket 지원
+- 현대적인 Python 프레임워크
+
+### Vanilla JavaScript 사용
+- 의존성 최소화
+- 빠른 로딩 속도
+- 직접적인 DOM 조작
+
+### 글래스모피즘 디자인
+- 2024-2025 트렌드 반영
+- 시각적 깊이감 연출
+- 모던한 사용자 경험
