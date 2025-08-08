@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Homework All-in-One</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Homework All-in-One</h1>
+      <p>한 페이지에서 과제 리마인더와 크롤링을 모두 제어합니다.</p>
+    </header>
+
+    <main>
+      <section class="panel">
+        <h2>리마인더 시스템</h2>
+        <div class="grid">
+          <label>13기 시험 ID <input id="r-13" type="text" placeholder="예: 9120" /></label>
+          <label>14기 시험 ID <input id="r-14" type="text" placeholder="예: 9121" /></label>
+          <label>15기 시험 ID <input id="r-15" type="text" placeholder="예: 9122" /></label>
+          <label>16기 시험 ID <input id="r-16" type="text" placeholder="예: 9129" /></label>
+        </div>
+        <div class="actions">
+          <button id="r-start">과제 확인 시작</button>
+          <button id="r-stop" class="secondary">중지</button>
+          <span id="r-status" class="status-badge">대기</span>
+        </div>
+
+        <div class="progress">
+          <div id="r-progress" class="progress-bar" style="width: 0%"></div>
+        </div>
+
+        <details open>
+          <summary>로그</summary>
+          <pre id="r-logs" class="logs"></pre>
+        </details>
+
+        <details>
+          <summary>결과</summary>
+          <div id="r-results" class="results"></div>
+          <div class="row">
+            <input id="r-channel" type="text" placeholder="#faq-bot-test (선택)" />
+            <button id="r-slack" class="warning">미제출자 슬랙 리마인더 전송</button>
+          </div>
+          <div id="r-slack-resp" class="note"></div>
+        </details>
+      </section>
+
+      <section class="panel">
+        <h2>크롤러 시스템</h2>
+        <div class="grid">
+          <label>시험 ID <input id="c-exam" type="text" placeholder="숫자만" /></label>
+          <label>
+            파일 형식
+            <select id="c-format">
+              <option value="csv">CSV</option>
+              <option value="xlsx">XLSX</option>
+              <option value="json">JSON</option>
+              <option value="xml">XML</option>
+            </select>
+          </label>
+        </div>
+        <div class="actions">
+          <button id="c-start">크롤링 시작</button>
+          <button id="c-stop" class="secondary">중지</button>
+          <span id="c-status" class="status-badge">대기</span>
+        </div>
+
+        <div class="progress">
+          <div id="c-progress" class="progress-bar" style="width: 0%"></div>
+        </div>
+
+        <details open>
+          <summary>로그</summary>
+          <pre id="c-logs" class="logs"></pre>
+        </details>
+
+        <details>
+          <summary>다운로드</summary>
+          <div id="c-download"></div>
+        </details>
+      </section>
+    </main>
+
+    <footer>
+      <small>© All-in-One Console</small>
+    </footer>
+
+    <script src="/static/script.js"></script>
+  </body>
+  </html>
+
+

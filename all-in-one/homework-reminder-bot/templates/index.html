@@ -1,0 +1,435 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0"><i class="fas fa-search me-2"></i>과제 제출 현황 확인</h4>
+            </div>
+            <div class="card-body">
+                <form id="homeworkForm">
+                    <div class="mb-4">
+                        <label for="exam_id" class="form-label">
+                            <i class="fas fa-clipboard-list me-2"></i>시험 ID
+                        </label>
+                        <input type="text" 
+                               class="form-control form-control-lg" 
+                               id="exam_id" 
+                               name="exam_id" 
+                               placeholder="예: 12345" 
+                               required>
+                        <div class="form-text">
+                            확인하고 싶은 시험의 ID를 입력하세요. 
+                            (URL: https://lmsadmin-kdt.fastcampus.co.kr/exams/<strong>시험ID</strong>/detail)
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg" id="checkBtn">
+                            <i class="fas fa-play me-2"></i>과제 현황 확인 시작
+                        </button>
+                    </div>
+                </form>
+
+                <!-- 진행 상황 표시 -->
+                <div id="progressSection" style="display: none;">
+                    <hr class="my-4">
+                    <h5><i class="fas fa-spinner fa-spin me-2"></i>진행 상황</h5>
+                    <div class="progress mb-3">
+                        <div class="progress-bar" role="progressbar" id="progressBar" style="width: 0%"></div>
+                    </div>
+                    <div id="statusMessage" class="status-message status-info">
+                        크롤링을 시작합니다...
+                    </div>
+                    
+                    <!-- 실시간 수집 현황 -->
+                    <div id="realTimeSection" style="display: none;">
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-success text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-list me-2"></i>수집된 제출 학생 
+                                            <span class="badge bg-light text-dark" id="collectedCount">0</span>
+                                        </h6>
+                                    </div>
+                                    <div class="card-body p-2" style="max-height: 200px; overflow-y: auto;">
+                                        <div id="collectedStudentsList">
+                                            <p class="text-muted text-center py-3">
+                                                <i class="fas fa-hourglass-half me-2"></i>수집 대기 중...
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card">
+                                    <div class="card-header bg-info text-white">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-user me-2"></i>현재 처리 중
+                                        </h6>
+                                    </div>
+                                    <div class="card-body text-center">
+                                        <div id="currentStudent" class="h5 current-student-display">
+                                            -
+                                        </div>
+                                        <div id="progressStats" class="progress-stats">
+                                            <small>진행률: <span id="progressPercent">0</span>%</small>
+                                        </div>
+                                        <div id="expectedTotal" class="text-muted mt-2">
+                                            <small>예상 총 인원: <span id="totalExpected">-</span>명</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 실시간 로그 섹션 -->
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                                        <h6 class="mb-0">
+                                            <i class="fas fa-terminal me-2"></i>실시간 로그
+                                        </h6>
+                                        <button class="btn btn-sm btn-outline-light" onclick="toggleLogSection()">
+                                            <i class="fas fa-expand-alt" id="logToggleIcon"></i>
+                                        </button>
+                                    </div>
+                                    <div class="card-body p-2" id="logSection" style="max-height: 150px; overflow-y: auto; background: #1e1e1e; font-family: 'Courier New', monospace;">
+                                        <div id="realTimeLogs">
+                                            <p class="text-light small mb-1">
+                                                <i class="fas fa-circle text-success me-2" style="font-size: 0.5rem;"></i>로그 대기 중...
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 결과 섹션 -->
+                <div id="resultSection" style="display: none;">
+                    <hr class="my-4">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-primary" id="totalCount">0</h3>
+                                <p class="text-muted">전체 학생</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-success" id="submittedCount">0</h3>
+                                <p class="text-muted">제출 완료</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-center">
+                                <h3 class="text-danger" id="notSubmittedCount">0</h3>
+                                <p class="text-muted">미제출</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mt-3">
+                        <button class="btn btn-success btn-lg" id="slackBtn" onclick="sendSlackReminder()">
+                            <i class="fab fa-slack me-2"></i>슬랙으로 리마인더 전송
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>사용 방법</h5>
+            </div>
+            <div class="card-body">
+                <ol class="list-unstyled">
+                    <li class="mb-3">
+                        <span class="badge bg-primary rounded-pill me-2">1</span>
+                        FastCampus LMS에서 확인하고 싶은 시험의 ID를 복사합니다.
+                    </li>
+                    <li class="mb-3">
+                        <span class="badge bg-primary rounded-pill me-2">2</span>
+                        위 입력란에 시험 ID를 입력하고 '과제 현황 확인 시작' 버튼을 클릭합니다.
+                    </li>
+                    <li class="mb-3">
+                        <span class="badge bg-primary rounded-pill me-2">3</span>
+                        <strong>실시간 진행상황</strong>을 확인하며 기다립니다. 
+                        <small class="text-muted d-block mt-1">
+                            • 수집된 학생 이름이 실시간으로 표시됩니다<br>
+                            • 현재 처리 중인 학생과 진행률을 확인할 수 있습니다
+                        </small>
+                    </li>
+                    <li class="mb-3">
+                        <span class="badge bg-primary rounded-pill me-2">4</span>
+                        크롤링이 완료되면 제출 현황을 확인할 수 있습니다.
+                    </li>
+                    <li class="mb-3">
+                        <span class="badge bg-primary rounded-pill me-2">5</span>
+                        '슬랙으로 리마인더 전송' 버튼을 클릭하여 미제출 학생들에게 알림을 보냅니다.
+                    </li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0"><i class="fas fa-exclamation-triangle me-2"></i>주의사항</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled small">
+                    <li class="mb-2">
+                        <i class="fas fa-info text-info me-2"></i>
+                        크롤링 중에는 다른 작업을 시작할 수 없습니다.
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-clock text-warning me-2"></i>
+                        크롤링 시간은 학생 수에 따라 달라집니다. (학생 1명당 약 2-3초)
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-eye text-primary me-2"></i>
+                        실시간으로 수집되는 학생 이름을 확인할 수 있습니다.
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        올바른 시험 ID를 입력해주세요.
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let checkInterval;
+
+$(document).ready(function() {
+    $('#homeworkForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const examId = $('#exam_id').val();
+        if (!examId) {
+            alert('시험 ID를 입력해주세요.');
+            return;
+        }
+
+        // UI 초기화
+        $('#checkBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>크롤링 진행 중...');
+        $('#progressSection').show();
+        $('#resultSection').hide();
+        $('#realTimeSection').hide();
+        $('#progressBar').css('width', '0%');
+        $('#statusMessage').removeClass().addClass('status-message status-info').text('크롤링을 시작합니다...');
+        
+        // 실시간 섹션 초기화
+        $('#collectedCount').text('0');
+        $('#collectedStudentsList').html('<p class="text-muted text-center py-3"><i class="fas fa-hourglass-half me-2"></i>수집 대기 중...</p>');
+        $('#currentStudent').text('-');
+        $('#progressPercent').text('0');
+        $('#totalExpected').text('-');
+
+        // 서버에 요청
+        $.post('/check_homework', {exam_id: examId})
+            .done(function(response) {
+                console.log('크롤링 시작:', response);
+                startStatusCheck();
+            })
+            .fail(function(xhr) {
+                const error = xhr.responseJSON ? xhr.responseJSON.error : '알 수 없는 오류가 발생했습니다.';
+                $('#statusMessage').removeClass().addClass('status-message status-error').text('오류: ' + error);
+                resetUI();
+            });
+    });
+});
+
+function startStatusCheck() {
+    checkInterval = setInterval(function() {
+        $.get('/status')
+            .done(function(status) {
+                // 기본 진행상황 업데이트
+                $('#progressBar').css('width', status.progress + '%');
+                $('#statusMessage').text(status.message);
+                $('#progressPercent').text(Math.round(status.progress));
+                
+                // 실시간 섹션 표시 (진행률이 10% 이상일 때)
+                if (status.progress >= 10 && status.running) {
+                    $('#realTimeSection').show();
+                    // 실시간 로그 가져오기
+                    loadRealTimeLogs();
+                }
+                
+                // 수집된 학생 리스트 업데이트
+                if (status.collected_students && status.collected_students.length > 0) {
+                    $('#collectedCount').text(status.collected_students.length);
+                    
+                    let studentsList = '';
+                    status.collected_students.forEach(function(student, index) {
+                        studentsList += `
+                            <div class="d-flex align-items-center justify-content-between p-2 mb-1 bg-light rounded realtime-student-item">
+                                <span><i class="fas fa-user-check text-success me-2"></i>${student}</span>
+                                <small class="text-muted">#${index + 1}</small>
+                            </div>
+                        `;
+                    });
+                    $('#collectedStudentsList').html(studentsList);
+                    
+                    // 최신 수집된 학생이 있다면 현재 처리 중으로 표시
+                    if (status.current_student) {
+                        $('#currentStudent').text(status.current_student);
+                    } else if (status.collected_students.length > 0) {
+                        $('#currentStudent').text(status.collected_students[status.collected_students.length - 1]);
+                    }
+                } else if (status.progress >= 35) {
+                    $('#collectedStudentsList').html('<p class="text-muted text-center py-3"><i class="fas fa-search me-2"></i>학생 정보 검색 중...</p>');
+                }
+                
+                // 예상 총 인원 업데이트
+                if (status.total_expected > 0) {
+                    $('#totalExpected').text(status.total_expected);
+                }
+                
+                // 완료 또는 실패 처리
+                if (!status.running) {
+                    clearInterval(checkInterval);
+                    
+                    if (status.progress === 100) {
+                        // 성공
+                        $('#statusMessage').removeClass().addClass('status-message status-success').text('크롤링이 완료되었습니다!');
+                        $('#currentStudent').text('완료');
+                        loadResults();
+                    } else {
+                        // 실패
+                        $('#statusMessage').removeClass().addClass('status-message status-error').text(status.message);
+                        $('#realTimeSection').hide();
+                        resetUI();
+                    }
+                }
+            })
+            .fail(function() {
+                clearInterval(checkInterval);
+                $('#statusMessage').removeClass().addClass('status-message status-error').text('상태 확인 중 오류가 발생했습니다.');
+                $('#realTimeSection').hide();
+                resetUI();
+            });
+    }, 1500); // 1.5초마다 업데이트 (더 빠른 실시간 업데이트)
+}
+
+function loadResults() {
+    $.get('/results')
+        .done(function(results) {
+            $('#totalCount').text(results.total_students);
+            $('#submittedCount').text(results.submitted_count);
+            $('#notSubmittedCount').text(results.non_submitted_count);
+            $('#resultSection').show();
+            resetUI();
+        })
+        .fail(function() {
+            $('#statusMessage').removeClass().addClass('status-message status-error').text('결과를 불러오는 중 오류가 발생했습니다.');
+            resetUI();
+        });
+}
+
+function resetUI() {
+    $('#checkBtn').prop('disabled', false).html('<i class="fas fa-play me-2"></i>과제 현황 확인 시작');
+}
+
+function loadRealTimeLogs() {
+    $.get('/logs')
+        .done(function(response) {
+            if (response.logs && response.logs.length > 0) {
+                let logsHtml = '';
+                response.logs.forEach(function(log) {
+                    let iconClass = 'text-success';
+                    let icon = 'circle';
+                    
+                    // 로그 내용에 따라 아이콘과 색상 결정
+                    if (log.includes('실패') || log.includes('오류') || log.includes('ERROR')) {
+                        iconClass = 'text-danger';
+                        icon = 'exclamation-circle';
+                    } else if (log.includes('경고') || log.includes('WARNING')) {
+                        iconClass = 'text-warning';
+                        icon = 'exclamation-triangle';
+                    } else if (log.includes('완료') || log.includes('성공')) {
+                        iconClass = 'text-success';
+                        icon = 'check-circle';
+                    } else if (log.includes('시작') || log.includes('진행')) {
+                        iconClass = 'text-info';
+                        icon = 'play-circle';
+                    }
+                    
+                    logsHtml += `
+                        <p class="text-light small mb-1" style="word-break: break-all;">
+                            <i class="fas fa-${icon} ${iconClass} me-2" style="font-size: 0.5rem;"></i>${log}
+                        </p>
+                    `;
+                });
+                $('#realTimeLogs').html(logsHtml);
+                
+                // 로그 섹션을 맨 아래로 스크롤
+                const logSection = document.getElementById('logSection');
+                if (logSection) {
+                    logSection.scrollTop = logSection.scrollHeight;
+                }
+            }
+        })
+        .fail(function() {
+            $('#realTimeLogs').html(`
+                <p class="text-danger small mb-1">
+                    <i class="fas fa-exclamation-circle text-danger me-2" style="font-size: 0.5rem;"></i>로그 가져오기 실패
+                </p>
+            `);
+        });
+}
+
+function toggleLogSection() {
+    const logSection = $('#logSection');
+    const toggleIcon = $('#logToggleIcon');
+    
+    if (logSection.hasClass('expanded')) {
+        // 축소
+        logSection.removeClass('expanded').css('max-height', '150px');
+        toggleIcon.removeClass('fa-compress-alt').addClass('fa-expand-alt');
+    } else {
+        // 확장
+        logSection.addClass('expanded').css('max-height', '400px');
+        toggleIcon.removeClass('fa-expand-alt').addClass('fa-compress-alt');
+    }
+}
+
+function sendSlackReminder() {
+    $('#slackBtn').prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>전송 중...');
+    
+    $.get('/results')
+        .done(function(results) {
+            $.ajax({
+                url: '/send_slack_reminder',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    exam_id: results.exam_id,
+                    non_submitted: results.non_submitted
+                })
+            })
+            .done(function(response) {
+                alert('리마인더가 성공적으로 전송되었습니다!\n' + response.message);
+            })
+            .fail(function(xhr) {
+                const error = xhr.responseJSON ? xhr.responseJSON.message : '리마인더 전송 중 오류가 발생했습니다.';
+                alert('오류: ' + error);
+            })
+            .always(function() {
+                $('#slackBtn').prop('disabled', false).html('<i class="fab fa-slack me-2"></i>슬랙으로 리마인더 전송');
+            });
+        });
+}
+</script>
+{% endblock %}
