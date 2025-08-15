@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { OverlayLoading } from "@/components/ui/overlay-loading";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
@@ -12,9 +13,11 @@ export default function Page() {
   const [isRunning, setIsRunning] = useState(false);
   const [downloadPath, setDownloadPath] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
+  const [connecting, setConnecting] = useState(false);
 
   useEffect(() => {
     const wsUrl = BACKEND_URL.replace(/^http/, "ws") + "/ws";
+    setConnecting(true);
     const ws = new WebSocket(wsUrl);
     ws.onmessage = (ev) => {
       try {
@@ -34,6 +37,9 @@ export default function Page() {
         // ignore non-json
       }
     };
+    ws.onopen = () => setConnecting(false);
+    ws.onerror = () => setConnecting(false);
+    ws.onclose = () => setConnecting(false);
     wsRef.current = ws;
     return () => {
       ws.close();
@@ -48,6 +54,7 @@ export default function Page() {
     setProgress(0);
     setDownloadPath(null);
     setIsRunning(true);
+    setConnecting(true);
     const res = await fetch(`${BACKEND_URL}/api/crawl`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -57,6 +64,7 @@ export default function Page() {
       const msg = await res.json().catch(() => ({}));
       setIsRunning(false);
       setLogs((prev) => [...prev, `요청 실패: ${msg?.detail ?? res.statusText}`]);
+      setConnecting(false);
     }
   };
 
@@ -130,6 +138,7 @@ export default function Page() {
           ))}
         </div>
       </section>
+      <OverlayLoading visible={connecting && isRunning} title="연결중" description="로그가 곧 도착합니다..." />
     </main>
   );
 }
