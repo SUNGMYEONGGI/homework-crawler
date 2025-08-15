@@ -2,6 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { OverlayLoading } from "@/components/ui/overlay-loading";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
@@ -74,70 +79,100 @@ export default function Page() {
   };
 
   return (
-    <main className="mx-auto max-w-3xl p-6 space-y-6">
-      <h1 className="text-2xl font-semibold">Homework Crawler</h1>
-      <section className="grid gap-4 sm:grid-cols-3">
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium mb-1">시험 ID</label>
-          <input
-            value={examId}
-            onChange={(e) => setExamId(e.target.value)}
-            placeholder="예: 1234"
-            className="w-full rounded border px-3 py-2"
-          />
-        </div>
+    <main className="mx-auto max-w-5xl p-6 md:p-10 space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <label className="block text-sm font-medium mb-1">파일 형식</label>
-          <select
-            value={format}
-            onChange={(e) => setFormat(e.target.value)}
-            className="w-full rounded border px-3 py-2"
-          >
-            <option value="csv">CSV</option>
-            <option value="xlsx">XLSX</option>
-            <option value="json">JSON</option>
-            <option value="xml">XML</option>
-          </select>
+          <h1 className="text-3xl font-semibold tracking-tight">Homework Crawler</h1>
+          <p className="mt-1 text-sm text-muted-foreground">Fastcampus 과제 수집 대시보드</p>
         </div>
-      </section>
+      </div>
 
-      <section className="flex items-center gap-3">
-        <button
-          disabled={!canStart}
-          onClick={startCrawl}
-          className="rounded bg-black px-4 py-2 text-white disabled:opacity-40"
-        >
-          {isRunning ? "실행 중..." : "수집 시작"}
-        </button>
-        <button
-          disabled={!isRunning}
-          onClick={stopCrawl}
-          className="rounded border px-4 py-2 disabled:opacity-40"
-        >
-          중지
-        </button>
-        <div className="ml-auto text-sm">진행률: {progress}%</div>
-      </section>
-
-      {downloadPath && (
-        <a
-          href={`${BACKEND_URL}/api/download/${encodeURIComponent(downloadPath)}`}
-          className="inline-block rounded bg-green-600 px-4 py-2 text-white"
-        >
-          결과 다운로드
-        </a>
-      )}
-
-      <section>
-        <div className="text-sm font-medium mb-2">로그</div>
-        <div className="h-64 overflow-auto rounded border bg-white p-3 text-sm">
-          {logs.map((l, i) => (
-            <div key={i} className="whitespace-pre-wrap">
-              {l}
+      <div className="grid gap-6 md:grid-cols-3">
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle>수집 설정</CardTitle>
+            <CardDescription>시험 ID와 파일 형식을 선택하고 수집을 시작하세요.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium mb-1">시험 ID</label>
+                <Input value={examId} onChange={(e) => setExamId(e.target.value)} placeholder="예: 1234" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">파일 형식</label>
+                <Select value={format} onValueChange={setFormat}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="파일 형식 선택" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="csv">CSV</SelectItem>
+                    <SelectItem value="xlsx">XLSX</SelectItem>
+                    <SelectItem value="json">JSON</SelectItem>
+                    <SelectItem value="xml">XML</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-          ))}
-        </div>
-      </section>
+
+            <div className="mt-6 flex items-center gap-3">
+              <Button disabled={!canStart} onClick={startCrawl} className="bg-primary hover:bg-primary/90">
+                {isRunning ? "실행 중..." : "수집 시작"}
+              </Button>
+              <Button variant="outline" disabled={!isRunning} onClick={stopCrawl}>
+                중지
+              </Button>
+              <div className="ml-auto w-1/2">
+                <div className="mb-1 flex items-center justify-between text-xs text-muted-foreground">
+                  <span>진행률</span>
+                  <span>{progress}%</span>
+                </div>
+                <Progress value={progress} />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>다운로드</CardTitle>
+            <CardDescription>수집이 완료되면 파일을 내려받을 수 있어요.</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {downloadPath ? (
+              <a
+                href={`${BACKEND_URL}/api/download/${encodeURIComponent(downloadPath)}`}
+                className="inline-block rounded-md bg-green-600 px-4 py-2 text-white hover:bg-green-700"
+              >
+                결과 다운로드
+              </a>
+            ) : (
+              <p className="text-sm text-muted-foreground">아직 생성된 파일이 없습니다.</p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>실시간 로그</CardTitle>
+          <CardDescription>수집 진행 상황을 실시간으로 확인하세요.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-72 overflow-auto rounded-md border bg-white p-3 text-sm dark:bg-neutral-900">
+            {logs.length === 0 ? (
+              <div className="text-muted-foreground">아직 로그가 없습니다. 수집을 시작해보세요.</div>
+            ) : (
+              logs.map((l, i) => (
+                <div key={i} className="whitespace-pre-wrap">
+                  {l}
+                </div>
+              ))
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
       <OverlayLoading visible={connecting && isRunning} title="연결중" description="로그가 곧 도착합니다..." />
     </main>
   );
