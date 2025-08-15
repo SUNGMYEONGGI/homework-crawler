@@ -96,7 +96,7 @@ export default function Page() {
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <div className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs">
-              Fastcampus Persona
+              Fastcampus
             </div>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">Homework Crawler</h1>
             <p className="mt-1 text-white/85">Fastcampus LMS 과제 수집 대시보드</p>
