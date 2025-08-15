@@ -28,6 +28,8 @@ export default function Page() {
     ws.onmessage = (ev) => {
       try {
         const data = JSON.parse(ev.data);
+        // 백엔드에서 첫 응답이 도착하면 대기 오버레이 즉시 해제
+        setConnecting(false);
         if (data.type === "log") {
           setLogs((prev) => [...prev, data.message]);
         } else if (data.type === "progress") {
@@ -206,7 +208,7 @@ export default function Page() {
               <Mail className="h-4 w-4" /> myeonggi.seong@day1company.co.kr
             </a>
             <a
-              href="https://github.com/SUNGMYEONGGI/homework-crawler"
+              href="https://github.com/SUNGMYEONGGI"
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-2 rounded-md border px-3 py-2 shadow-sm hover:bg-accent"
@@ -217,7 +219,7 @@ export default function Page() {
         </div>
       </footer>
 
-      <OverlayLoading visible={connecting && isRunning} title="연결중" description="로그가 곧 도착합니다..." />
+      <OverlayLoading visible={connecting && isRunning && logs.length === 0} title="연결중" description="로그가 곧 도착합니다..." />
     </main>
   );
 }
