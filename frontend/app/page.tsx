@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Progress } from "@/components/ui/progress";
+import { Mail, Github } from "lucide-react";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
 
@@ -79,13 +80,24 @@ export default function Page() {
   };
 
   return (
-    <main className="mx-auto max-w-5xl p-6 md:p-10 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Homework Crawler</h1>
-          <p className="mt-1 text-sm text-muted-foreground">Fastcampus 과제 수집 대시보드</p>
+    <main className="mx-auto max-w-6xl p-6 md:p-10 space-y-8">
+      {/* 브랜드 히어로 */}
+      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-fuchsia-600 to-pink-600 p-8 text-white shadow-lg">
+        <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+          <div>
+            <div className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs backdrop-blur-md">
+              Fastcampus Persona
+            </div>
+            <h1 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">Homework Crawler</h1>
+            <p className="mt-1 text-white/85">Fastcampus LMS 과제 수집 대시보드</p>
+          </div>
+          <div className="mt-4 md:mt-0">
+            <div className="rounded-2xl bg-white/10 px-4 py-3 text-sm">
+              시험 ID를 입력하고 수집을 시작하면 실시간 로그와 진행률을 확인할 수 있어요.
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       <div className="grid gap-6 md:grid-cols-3">
         <Card className="md:col-span-2">
@@ -172,6 +184,38 @@ export default function Page() {
           </div>
         </CardContent>
       </Card>
+
+      {/* 푸터 */}
+      <footer className="mt-8 rounded-3xl border bg-white/60 p-6 text-sm dark:bg-neutral-900/60">
+        <div className="grid gap-4 md:grid-cols-3">
+          <div>
+            <div className="text-base font-semibold">Fastcampus</div>
+            <div className="mt-1 text-muted-foreground">© {new Date().getFullYear()} Fastcampus. All rights reserved.</div>
+          </div>
+          <div>
+            <div className="font-medium">개발자</div>
+            <div className="mt-1">성명기 Myeonggi seong</div>
+            <div className="text-muted-foreground">교육운영/관리 매니저 (Learning Experience Manager)</div>
+            <div className="text-muted-foreground">운영파트 | 취업교육팀 | 인재성장교육그룹 | 커리어교육사업본부 | Day1 B2G</div>
+          </div>
+          <div className="flex items-center gap-4 md:justify-end">
+            <a
+              href="mailto:myeonggi.seong@day1company.co.kr"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-white hover:bg-primary/90"
+            >
+              <Mail className="h-4 w-4" /> myeonggi.seong@day1company.co.kr
+            </a>
+            <a
+              href="https://github.com/SUNGMYEONGGI/homework-crawler"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-2 rounded-md border px-3 py-2 hover:bg-accent"
+            >
+              <Github className="h-4 w-4" /> GitHub
+            </a>
+          </div>
+        </div>
+      </footer>
 
       <OverlayLoading visible={connecting && isRunning} title="연결중" description="로그가 곧 도착합니다..." />
     </main>
