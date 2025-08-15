@@ -20,6 +20,7 @@ export default function Page() {
   const [downloadPath, setDownloadPath] = useState<string | null>(null);
   const wsRef = useRef<WebSocket | null>(null);
   const [connecting, setConnecting] = useState(false);
+  const logContainerRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const wsUrl = BACKEND_URL.replace(/^http/, "ws") + "/ws";
@@ -76,6 +77,13 @@ export default function Page() {
     }
   };
 
+  // 로그가 업데이트될 때마다 하단으로 자동 스크롤
+  useEffect(() => {
+    const el = logContainerRef.current;
+    if (!el) return;
+    el.scrollTop = el.scrollHeight;
+  }, [logs]);
+
   const stopCrawl = async () => {
     await fetch(`${BACKEND_URL}/api/stop`, { method: "POST" });
     setIsRunning(false);
@@ -84,10 +92,10 @@ export default function Page() {
   return (
     <main className="mx-auto max-w-6xl p-6 md:p-10 space-y-8">
       {/* 브랜드 히어로 */}
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-[#ff0a54] to-[#c0126a] p-8 text-white shadow-lg">
+      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-[#ff0a54] to-[#c0126a] p-8 text-white shadow-[0_10px_30px_rgba(192,18,106,0.25)]">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
-            <div className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs backdrop-blur-md">
+            <div className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs">
               Fastcampus Persona
             </div>
             <h1 className="mt-3 text-3xl font-semibold tracking-tight md:text-4xl">Homework Crawler</h1>
@@ -173,15 +181,23 @@ export default function Page() {
           <CardDescription>수집 진행 상황을 실시간으로 확인하세요.</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-72 overflow-auto rounded-md border bg-white p-3 text-sm dark:bg-neutral-900">
+          <div ref={logContainerRef} className="h-72 overflow-auto rounded-md border bg-white p-3 text-sm dark:bg-neutral-900">
             {logs.length === 0 ? (
               <div className="text-muted-foreground">아직 로그가 없습니다. 수집을 시작해보세요.</div>
             ) : (
-              logs.map((l, i) => (
-                <div key={i} className="whitespace-pre-wrap">
-                  {l}
-                </div>
-              ))
+              <ul className="space-y-1">
+                {logs.map((l, i) => (
+                  <li
+                    key={i}
+                    className={`whitespace-pre-wrap rounded px-2 py-1 transition-colors hover:bg-primary/5 ${
+                      i === logs.length - 1 ? "bg-primary/5" : ""
+                    }`}
+                  >
+                    <span className="mr-2 select-none text-xs text-primary">•</span>
+                    {l}
+                  </li>
+                ))}
+              </ul>
             )}
           </div>
         </CardContent>

@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body className="min-h-screen bg-gradient-to-b from-pink-50 to-white text-gray-900 dark:from-neutral-900 dark:to-neutral-950">
+      <body className="min-h-screen bg-gradient-to-b from-pink-50 to-white text-gray-900 antialiased dark:from-neutral-900 dark:to-neutral-950">
         {children}
       </body>
     </html>
