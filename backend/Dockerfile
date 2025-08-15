@@ -10,6 +10,10 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update && apt-get install -y \
     chromium \
     chromium-driver \
+    ca-certificates \
+    libglib2.0-0 \
+    libgtk-3-0 \
+    libgbm1 \
     fonts-liberation \
     libasound2 \
     libatk-bridge2.0-0 \
@@ -31,6 +35,7 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY ./app /app/app
 
-# Uvicorn 실행 (Railway는 PORT 환경변수 제공)
-ENV PORT=8000
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Uvicorn 실행 (Render/플랫폼이 PORT를 주입)
+ENV PORT=8000 \
+    CHROME_BINARY=/usr/bin/chromium
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

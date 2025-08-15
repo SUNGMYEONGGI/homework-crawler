@@ -37,8 +37,10 @@ class FastCampusLMSCrawler:
     def setup_driver(self):
         self._add_log("Selenium 드라이버 설정 시작...")
         chrome_options = Options()
+        # Render/서버 환경 호환을 위해 headless 기본값 사용
         chrome_options.add_argument("--headless=new")
         chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument("--window-size=1920,1080")
         chrome_options.add_argument("--disable-gpu")
         chrome_options.add_argument("--no-sandbox")
         chrome_options.add_argument("--disable-dev-shm-usage")
@@ -46,6 +48,7 @@ class FastCampusLMSCrawler:
         chrome_options.add_argument("--disable-notifications")
         chrome_options.add_argument("--disable-extensions")
         chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+        chrome_options.add_argument("--remote-allow-origins=*")
         chrome_options.add_argument(
             "--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
         )
@@ -59,6 +62,12 @@ class FastCampusLMSCrawler:
                 "autofill.profile_enabled": False,
             },
         )
+
+        # 컨테이너/서버에서 chromium 바이너리 경로 지정 (Dockerfile에서 CHROME_BINARY 설정)
+        chrome_binary = os.getenv("CHROME_BINARY")
+        if chrome_binary and os.path.exists(chrome_binary):
+            chrome_options.binary_location = chrome_binary
+            self._add_log(f"Chrome binary 사용: {chrome_binary}")
 
         # Railway의 Docker 환경에서 chromium이 설치되어 있을 수 있으므로 우선 시스템 chromedriver 시도
         try:
