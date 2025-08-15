@@ -1,8 +1,37 @@
-## Homework Crawler (Monorepo)
+## Homework Crawler
 
-Fastcampus LMS 과제(블로그 링크 등)를 수집하는 크롤러입니다. 프론트엔드는 Next.js(Typescript, Tailwind, shadcn-ui), 백엔드는 FastAPI + Selenium으로 구성되어 있으며 각각 Vercel/Render에 배포합니다.
+Fastcampus LMS 과제(블로그 링크 등)를 자동 수집·정리하는 대시보드/크롤러
 
-### 폴더 구조
+### 한 줄 설명
+- 프론트(Next.js)에서 시험 ID와 결과 파일 형식을 입력 → 백엔드(FastAPI)가 비동기로 크롤링 → 진행률/로그를 실시간(WebSocket)으로 보여주고, CSV/XLSX/JSON/XML 파일로 다운로드합니다.
+
+---
+
+## 프로젝트 개요
+
+### 목적
+- 운영자가 LMS 관리자 화면을 일일이 확인하지 않고, 과제 제출 내용을 자동으로 수집/정리하여 데이터 처리 시간을 단축합니다.
+
+### 문제/해결
+- 문제: 수강생 과제 URL/내용을 수동으로 집계하면 시간이 오래 걸리고, 누락/오류 가능성이 큼
+- 해결: Selenium 기반 크롤링으로 제출 내역을 순회 수집, 실시간 진행률과 로그를 제공하여 투명성/안정성 확보. 한 번에 다양한 포맷으로 내보내 결과 공유가 쉬움
+
+### 주요 기능
+- 시험 ID 기준 과제 제출 데이터 수집
+- 실시간 로그/진행률(WebSocket) 스트리밍
+- 파일 저장 형식: CSV / XLSX / JSON / XML
+- 일시 중지/중단, 상태 조회, 결과 파일 다운로드
+- 환경변수 기반 보안(계정/도메인), CORS 제어
+- 컨테이너 환경(Chromium)에서 안정적 헤드리스 실행
+
+### 기대 효과/목표
+- 운영자의 수작업을 자동화하여 처리 시간 절감
+- 데이터 누락/편차 최소화, 결과의 일관성 확보
+- 배포 자동화(Vercel/Render)로 유지보수 용이
+
+---
+
+## 폴더 구조
 
 ```
 homework-crawler-main/
@@ -21,6 +50,23 @@ homework-crawler-main/
    │  └─ ui/           # shadcn 컴포넌트(overlay 등 포함)
    └─ tailwind.config.ts 외 설정 파일들
 ```
+
+---
+
+## 기술 스택
+
+<p>
+  <img alt="Next.js" src="https://img.shields.io/badge/Next.js-000?style=for-the-badge&logo=next.js&logoColor=white" />
+  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
+  <img alt="TailwindCSS" src="https://img.shields.io/badge/TailwindCSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" />
+  <img alt="shadcn/ui" src="https://img.shields.io/badge/shadcn%2Fui-111?style=for-the-badge&logo=radixui&logoColor=white" />
+  <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
+  <img alt="Python" src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img alt="Selenium" src="https://img.shields.io/badge/Selenium-43B02A?style=for-the-badge&logo=selenium&logoColor=white" />
+  <img alt="Docker" src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+  <img alt="Vercel" src="https://img.shields.io/badge/Vercel-000?style=for-the-badge&logo=vercel&logoColor=white" />
+  <img alt="Render" src="https://img.shields.io/badge/Render-46E3B7?style=for-the-badge&logo=render&logoColor=111827" />
+</p>
 
 ---
 
@@ -131,7 +177,52 @@ npm run dev
 ## 디자인/UX
 - shadcn-ui 컴포넌트(Card, Button, Select, Progress 등) 기반
 - Fastcampus 톤(마젠타) 컬러 토큰 적용: `frontend/app/globals.css`
-- 연결 지연 시 "연결중" 오버레이: `frontend/components/ui/overlay-loading.tsx`
+- 연결 지연 시 "연결중" 오버레이: `frontend/components/ui/overlay-loading.tsx` (첫 로그 수신 시 자동 종료)
+
+---
+
+## 설치 및 실행 방법(자세)
+
+1) 레포 클론 후 환경 변수 세팅
+```bash
+git clone https://github.com/SUNGMYEONGGI/homework-crawler.git
+cd homework-crawler
+# backend/.env, frontend/.env.local 작성 (아래 예시 참고)
+```
+
+2) 백엔드 실행
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn app.main:app --host 0.0.0.0 --port 8000
+```
+
+3) 프론트 실행
+```bash
+cd frontend
+npm i
+npm run dev
+```
+
+4) 접속 및 테스트
+- 브라우저에서 `http://localhost:3000` → 시험 ID 입력 → 수집 시작 → 로그/진행률 확인 → 파일 다운로드
+
+> 스크린샷/데모: 운영 중 배포 URL `https://homework-crawler.vercel.app/` 참고.
+
+---
+
+## 사용 방법
+
+### 기본 플로우
+1. 상단 "수집 설정" 카드에서 시험 ID 입력, 파일 형식 선택(CSV/XLSX/JSON/XML)
+2. "수집 시작" 클릭 → 상단 히어로 보더 아래 진행률 바 + 실시간 로그 확인
+3. 완료 시 우측 "다운로드" 카드에서 결과 파일 다운로드
+4. 필요 시 "중지"로 현재 작업을 종료
+
+### 기능별 사용 예시
+- 실시간 로그: WebSocket으로 서버 로그가 도착하면 화면에 즉시 반영, 첫 로그가 도착하면 "연결중" 팝업은 자동으로 닫힘
+- 중지: 크롤러 리소스 정리 후 상태 초기화(서버가 드라이버 quit)
+- 파일 형식: 운영팀 공유 상황에 맞춰 CSV(범용) 혹은 XLSX(엑셀) 권장
 
 ---
 
