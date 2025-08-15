@@ -82,7 +82,7 @@ export default function Page() {
   return (
     <main className="mx-auto max-w-6xl p-6 md:p-10 space-y-8">
       {/* 브랜드 히어로 */}
-      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-fuchsia-600 to-pink-600 p-8 text-white shadow-lg">
+      <section className="overflow-hidden rounded-3xl bg-gradient-to-r from-[#ff0a54] to-[#c0126a] p-8 text-white shadow-lg">
         <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
           <div>
             <div className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs backdrop-blur-md">
@@ -186,8 +186,8 @@ export default function Page() {
       </Card>
 
       {/* 푸터 */}
-      <footer className="mt-8 rounded-3xl border bg-white/60 p-6 text-sm dark:bg-neutral-900/60">
-        <div className="grid gap-4 md:grid-cols-3">
+      <footer className="mt-8 rounded-3xl border bg-white/70 p-6 text-sm dark:bg-neutral-900/70">
+        <div className="grid gap-4 md:grid-cols-3 md:items-center">
           <div>
             <div className="text-base font-semibold">Fastcampus</div>
             <div className="mt-1 text-muted-foreground">© {new Date().getFullYear()} Fastcampus. All rights reserved.</div>
@@ -196,12 +196,12 @@ export default function Page() {
             <div className="font-medium">개발자</div>
             <div className="mt-1">성명기 Myeonggi seong</div>
             <div className="text-muted-foreground">교육운영/관리 매니저 (Learning Experience Manager)</div>
-            <div className="text-muted-foreground">운영파트 | 취업교육팀 | 인재성장교육그룹 | 커리어교육사업본부 | Day1 B2G</div>
+            <div className="text-muted-foreground whitespace-nowrap">운영파트 | 취업교육팀 | 인재성장교육그룹 | 커리어교육사업본부 | Day1 B2G</div>
           </div>
-          <div className="flex items-center gap-4 md:justify-end">
+          <div className="flex flex-wrap items-center gap-3 md:justify-end">
             <a
               href="mailto:myeonggi.seong@day1company.co.kr"
-              className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-white hover:bg-primary/90"
+              className="inline-flex items-center gap-2 rounded-md bg-primary px-3 py-2 text-white shadow hover:bg-primary/90"
             >
               <Mail className="h-4 w-4" /> myeonggi.seong@day1company.co.kr
             </a>
@@ -209,7 +209,7 @@ export default function Page() {
               href="https://github.com/SUNGMYEONGGI/homework-crawler"
               target="_blank"
               rel="noreferrer"
-              className="inline-flex items-center gap-2 rounded-md border px-3 py-2 hover:bg-accent"
+              className="inline-flex items-center gap-2 rounded-md border px-3 py-2 shadow-sm hover:bg-accent"
             >
               <Github className="h-4 w-4" /> GitHub
             </a>
