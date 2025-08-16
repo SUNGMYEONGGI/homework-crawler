@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { OverlayLoading } from "@/components/ui/overlay-loading";
+import { PasswordModal } from "@/components/ui/password-modal";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { Mail, Github } from "lucide-react";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE ?? "http://localhost:8000";
+const BACKEND_URL = process.env.NEXT_PUBLIC_API_BASE ?? "https://homework-crawler.onrender.com";
 
 export default function Page() {
   const [examId, setExamId] = useState("");
@@ -21,6 +22,10 @@ export default function Page() {
   const wsRef = useRef<WebSocket | null>(null);
   const [connecting, setConnecting] = useState(false);
   const logContainerRef = useRef<HTMLDivElement | null>(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [showCompleteOverlay, setShowCompleteOverlay] = useState(false);
+  const EXPECTED_PASSWORD = process.env.NEXT_PUBLIC_COLLECT_PASSWORD ?? "";
 
   useEffect(() => {
     const wsUrl = BACKEND_URL.replace(/^http/, "ws") + "/ws";
@@ -38,6 +43,8 @@ export default function Page() {
         } else if (data.type === "complete") {
           setIsRunning(false);
           setDownloadPath(data.file_path);
+          setShowCompleteOverlay(true);
+          setTimeout(() => setShowCompleteOverlay(false), 1800);
         } else if (data.type === "error") {
           setIsRunning(false);
           setLogs((prev) => [...prev, `ERROR: ${data.message}`]);
@@ -75,6 +82,24 @@ export default function Page() {
       setLogs((prev) => [...prev, `요청 실패: ${msg?.detail ?? res.statusText}`]);
       setConnecting(false);
     }
+  };
+
+  const requestStart = () => {
+    setPasswordError("");
+    setShowPasswordModal(true);
+  };
+
+  const handleConfirmPassword = (input: string) => {
+    if (!EXPECTED_PASSWORD) {
+      setPasswordError("환경변수 비밀번호가 설정되지 않았습니다.");
+      return;
+    }
+    if (input !== EXPECTED_PASSWORD) {
+      setPasswordError("비밀번호가 올바르지 않습니다.");
+      return;
+    }
+    setShowPasswordModal(false);
+    startCrawl();
   };
 
   // 로그가 업데이트될 때마다 하단으로 자동 스크롤
@@ -138,7 +163,7 @@ export default function Page() {
             </div>
 
             <div className="mt-6 flex items-center gap-3">
-              <Button disabled={!canStart} onClick={startCrawl} className="bg-primary hover:bg-primary/90">
+              <Button disabled={!canStart} onClick={requestStart} className="bg-primary hover:bg-primary/90">
                 {isRunning ? "실행 중..." : "수집 시작"}
               </Button>
               <Button variant="outline" disabled={!isRunning} onClick={stopCrawl}>
@@ -226,7 +251,7 @@ export default function Page() {
             <a
               href="https://github.com/SUNGMYEONGGI"
               target="_blank"
-              rel="noreferrer"
+              rel="noreferrer noopener"
               className="inline-flex items-center gap-2 rounded-md border px-3 py-2 shadow-sm hover:bg-accent"
             >
               <Github className="h-4 w-4" /> GitHub
@@ -236,6 +261,15 @@ export default function Page() {
       </footer>
 
       <OverlayLoading visible={connecting && isRunning && logs.length === 0} title="연결중" description="로그가 곧 도착합니다..." />
+      <OverlayLoading visible={showCompleteOverlay} title="수집 완료" description="결과를 다운로드할 수 있어요." />
+      <PasswordModal
+        visible={showPasswordModal}
+        examId={examId}
+        format={format}
+        onConfirm={handleConfirmPassword}
+        onCancel={() => setShowPasswordModal(false)}
+        errorMessage={passwordError}
+      />
     </main>
   );
 }
